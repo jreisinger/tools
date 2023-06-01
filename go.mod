@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/go-git/go-git/v5 v5.6.1
 	github.com/google/go-github/v50 v50.2.0
+	github.com/yuin/goldmark v1.4.13
 	golang.org/x/oauth2 v0.7.0
 )
 
