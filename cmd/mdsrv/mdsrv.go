@@ -22,12 +22,16 @@ import (
 	"github.com/jreisinger/tools/markdown"
 )
 
-const dir = "."
-
 func main() {
-	mdfiles, err := markdown.Files(os.DirFS(dir))
-	if err != nil {
-		log.Fatal(err)
+	var mdfiles []string
+
+	if len(os.Args[1:]) > 0 {
+		mdfiles = os.Args[1:]
+	} else {
+		var err error
+		if mdfiles, err = markdown.Files(os.DirFS(".")); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	tmpdir, err := os.MkdirTemp("/tmp", "mdsrv")
@@ -72,7 +76,7 @@ func main() {
 	}
 
 	addr := "localhost:8000"
-	log.Printf("serving %d files from %s at %s", len(mdfiles), tmpdir, addr)
+	log.Printf("serving %d file(s) from %s at %s", len(mdfiles), tmpdir, addr)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
