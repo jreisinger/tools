@@ -11,12 +11,14 @@ TODO
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 
+	"github.com/jreisinger/tools/html"
 	"github.com/jreisinger/tools/markdown"
 )
 
@@ -43,10 +45,15 @@ func main() {
 		if err != nil {
 			log.Fatalf("read markdown file: %v", err)
 		}
+
+		var buf bytes.Buffer
+		buf.Write([]byte(html.Head))
 		h, err := markdown.ToHTML(m)
 		if err != nil {
 			log.Fatal(err)
 		}
+		buf.Write(h)
+		buf.Write([]byte(html.Tail))
 
 		dir := filepath.Dir(mdfile)
 		if err := os.MkdirAll(filepath.Join(tmpdir, dir), 0750); err != nil {
@@ -55,9 +62,13 @@ func main() {
 
 		htmlfile := markdown.ChangeExt(mdfile, ".html")
 		if err := os.WriteFile(
-			filepath.Join(tmpdir, htmlfile), h, 0640); err != nil {
+			filepath.Join(tmpdir, htmlfile), buf.Bytes(), 0640); err != nil {
 			log.Fatalf("write html file: %v", err)
 		}
+	}
+
+	if err := html.AddCSS(tmpdir); err != nil {
+		log.Fatal(err)
 	}
 
 	addr := "localhost:8000"
