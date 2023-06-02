@@ -1,12 +1,11 @@
 /*
-Mdsrv converts Markdown files in current directory to temporary HTML files and
-serves them over HTTP.
+Mdsrv converts supplied Markdown files or all Markdown files in current
+directory to temporary HTML files and serves them over HTTP.
 
 TODO
   - [x] covert MD to temporary HTML using goldmark
   - [x] use http.FileServer to server HTML files
   - [x] if a file is changed or a new file is created re-render them
-  - [ ] if a file is removed, remove it from tmpdir
 */
 package main
 
