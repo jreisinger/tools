@@ -1,16 +1,14 @@
-package markdown_test
+package markdown
 
 import (
 	"io/fs"
 	"testing"
 	"testing/fstest"
-
-	"github.com/jreisinger/tools/markdown"
 )
 
 func TestToHTML(t *testing.T) {
 	md := []byte(`# Title`)
-	h, err := markdown.ToHTML(md)
+	h, err := toHTML(md)
 	if err != nil {
 		t.Fatalf("ToHTML failed: %v", err)
 	}
@@ -33,7 +31,7 @@ func TestFiles(t *testing.T) {
 			[]string{"dir/file.md", "dir/subdir/file.md"}},
 	}
 	for i, test := range tests {
-		got, err := markdown.Files(test.fsys)
+		got, err := Files(test.fsys)
 		if err != nil {
 			t.Fatalf("Files failed: %v", err)
 		}
@@ -54,7 +52,7 @@ func TestChangeExt(t *testing.T) {
 		{"dir/subdir/FILE.md", ".html", "dir/subdir/FILE.html"},
 	}
 	for _, test := range tests {
-		got := markdown.ChangeExt(test.path, test.ext)
+		got := changeExt(test.path, test.ext)
 		if got != test.want {
 			t.Errorf("got %q, want %q", got, test.want)
 		}
