@@ -10,11 +10,18 @@ import (
 
 	"github.com/jreisinger/tools/html"
 	"github.com/yuin/goldmark"
+	ghtml "github.com/yuin/goldmark/renderer/html"
 )
 
 func toHTML(markdown []byte) ([]byte, error) {
 	var buf bytes.Buffer
-	if err := goldmark.Convert(markdown, &buf); err != nil {
+	md := goldmark.New(
+		goldmark.WithRendererOptions(
+			// to show images inserted via GitHub web
+			ghtml.WithUnsafe(),
+		),
+	)
+	if err := md.Convert(markdown, &buf); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
