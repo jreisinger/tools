@@ -45,7 +45,7 @@ func main() {
 	}()
 
 	addr := "localhost:8000"
-	log.Printf("serving files from %s at %s", tmpdir, addr)
+	log.Printf("serving files from %s at http://%s", tmpdir, addr)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
