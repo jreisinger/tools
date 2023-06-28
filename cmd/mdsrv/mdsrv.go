@@ -10,6 +10,8 @@ TODO
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -20,7 +22,13 @@ import (
 	"github.com/jreisinger/tools/markdown"
 )
 
+var (
+	p = flag.Int("p", 8000, "port")
+)
+
 func main() {
+	flag.Parse()
+
 	tmpdir, err := tmpSubdir("/tmp")
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +41,7 @@ func main() {
 	// Continually be converting markdown files to html.
 	go func() {
 		for {
-			mdfiles, err := getMDfiles(os.Args[1:])
+			mdfiles, err := getMDfiles(flag.Args())
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -44,7 +52,7 @@ func main() {
 		}
 	}()
 
-	addr := "localhost:8000"
+	addr := fmt.Sprintf("localhost:%d", *p)
 	log.Printf("serving files from %s at http://%s", tmpdir, addr)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
