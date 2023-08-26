@@ -48,6 +48,11 @@ overflow: auto;
 white-space: pre-wrap;
 }
 
+blockquote
+{
+font-family: cursive;
+}
+
 @media screen and (max-device-width: 480px)
 {
 	body
@@ -55,6 +60,6 @@ white-space: pre-wrap;
 	-webkit-text-size-adjust: none;
 	}
 }
-	`
+`
 	return os.WriteFile(filepath.Join(dir, "style.css"), []byte(css), 0640)
 }
