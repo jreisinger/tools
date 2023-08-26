@@ -28,36 +28,30 @@ h3 { margin-bottom: 0px; }
 h4 { margin-bottom: 0px; }
 h5 { margin-bottom: 0px; }
 
-img 
-{
-max-width: 100%;
+img {
+	max-width: 100%;
 }
 
-code
-{
-font-family: monospace;
+code {
+	font-family: monospace;
 }
 
-pre
-{
-background: #f7f7f7;
-border: 1px solid #d7d7d7;
-margin: 1em 1.75em;
-padding: .25em;
-overflow: auto;
-white-space: pre-wrap;
+pre {
+	background: #f7f7f7;
+	border: 1px solid #d7d7d7;
+	margin: 1em 1.75em;
+	padding: .25em;
+	overflow: auto;
+	white-space: pre-wrap;
 }
 
-blockquote
-{
-font-family: cursive;
+blockquote {
+	font-family: cursive;
 }
 
-@media screen and (max-device-width: 480px)
-{
-	body
-	{
-	-webkit-text-size-adjust: none;
+@media screen and (max-device-width: 480px) {
+	body {
+		-webkit-text-size-adjust: none;
 	}
 }
 `
