@@ -16,10 +16,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/jreisinger/tools/html"
 	"github.com/jreisinger/tools/markdown"
+
+	cp "github.com/otiai10/copy"
 )
 
 var (
@@ -45,6 +48,11 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			if err := copyStatic(tmpdir); err != nil {
+				log.Fatal(err)
+			}
+
 			if err := markdown.ToHTML(tmpdir, mdfiles); err != nil {
 				log.Fatal(err)
 			}
@@ -56,6 +64,14 @@ func main() {
 	log.Printf("serving files from %s at http://%s", tmpdir, addr)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
+}
+
+// copyStatic copies static folder, if it exists, to tmpdir recursively.
+func copyStatic(tmpdir string) error {
+	if _, err := os.Stat("static"); os.IsNotExist(err) {
+		return nil
+	}
+	return cp.Copy("static", filepath.Join(tmpdir, "static"))
 }
 
 // getMDfiles filters out markdown files from CLI arguments. If there are no CLI
