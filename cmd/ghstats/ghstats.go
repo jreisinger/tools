@@ -25,9 +25,9 @@ func main() {
 	}
 	user := flag.Args()[0]
 
-	token := os.Getenv("GH_TOKEN")
+	token := os.Getenv("GITHUB_TOKEN")
 	if token == "" {
-		log.Fatalf("set GH_TOKEN environment variable")
+		log.Fatalf("set GITHUB_TOKEN environment variable")
 	}
 
 	stats, err := ghstats.Get(user, token)
