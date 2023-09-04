@@ -1,24 +1,18 @@
 Tools are small Go programs for various sysadmin-style tasks done from terminal.
 
-To use a tool:
+To use a tool on a local machine:
 
 ```
-$ go doc cmd/<tool>/<tool>.go
-$ go run cmd/<tool>/<tool>.go
-```
-
-or 
-
-```
-$ go install cmd/<tool>/<tool>.go # installs into ~/go/bin by default
+$ go doc cmd/<tool>
+$ go build -o ~/bin/ cmd/<tool>/*
 $ <tool>
 ```
 
-or
+To use a tool on a remote machine:
 
 ```
-$ GOOS=linux GOARCH=arm64 go build cmd/<tool>/<tool>.go # go tool dist list
+$ go tool dist list
+$ GOOS=linux GOARCH=arm64 go build cmd/<tool>/*
 $ scp ./<tool> user@raspberry.net:
-$ ssh user@raspberry.net
-raspberry$ ./<tool>
+$ ssh user@raspberry.net ./<tool>
 ```
