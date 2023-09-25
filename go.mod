@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/go-git/go-git/v5 v5.6.1
+	github.com/google/go-cmp v0.5.9
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-github/v50 v50.2.0
 	github.com/otiai10/copy v1.12.0
