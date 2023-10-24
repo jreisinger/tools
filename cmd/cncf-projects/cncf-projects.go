@@ -44,10 +44,10 @@ func main() {
 	}
 
 	var totalProjects int
-	for _, l := range tools.SortMapByValue(projectsPerLanguage, false) {
+	for _, l := range tools.SortByValue(projectsPerLanguage, false) {
 		totalProjects += l.Value
 	}
-	for _, l := range tools.SortMapByValue(projectsPerLanguage, true) {
+	for _, l := range tools.SortByValue(projectsPerLanguage, true) {
 		perc := float64(l.Value) / float64(totalProjects) * 100
 		fmt.Printf("%3d (%2.0f%%) %s\n", l.Value, perc, l.Key)
 	}

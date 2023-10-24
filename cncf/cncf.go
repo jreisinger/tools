@@ -88,7 +88,7 @@ func topLanguage(repoURL, githubToken string) (string, error) {
 	if len(languages) == 0 {
 		return "", nil
 	}
-	l := tools.SortMapByValue(languages, true)
+	l := tools.SortByValue(languages, true)
 	return l[0].Key, nil
 }
 
