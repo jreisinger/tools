@@ -23,6 +23,9 @@ type repr struct {
 }
 
 func printReprs(reprs []repr) {
+	if len(reprs) == 0 {
+		return
+	}
 	const format = "%v\t%v\t%v\t%v\t%v\n"
 	tw := new(tabwriter.Writer).Init(os.Stdout, 0, 8, 2, ' ', 0)
 	fmt.Fprintf(tw, format, "input", "bin", "oct", "dec", "hex")
