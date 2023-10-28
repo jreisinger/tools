@@ -17,7 +17,7 @@ import (
 func toHTML(markdown []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	md := goldmark.New(
-		goldmark.WithExtensions(&toc.Extender{}),
+		goldmark.WithExtensions(&toc.Extender{Compact: true}),
 		goldmark.WithRendererOptions(
 			// to show images inserted via GitHub web
 			ghtml.WithUnsafe(),
