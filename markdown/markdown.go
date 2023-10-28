@@ -11,11 +11,13 @@ import (
 	"github.com/jreisinger/tools/html"
 	"github.com/yuin/goldmark"
 	ghtml "github.com/yuin/goldmark/renderer/html"
+	"go.abhg.dev/goldmark/toc"
 )
 
 func toHTML(markdown []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	md := goldmark.New(
+		goldmark.WithExtensions(&toc.Extender{}),
 		goldmark.WithRendererOptions(
 			// to show images inserted via GitHub web
 			ghtml.WithUnsafe(),

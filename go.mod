@@ -9,6 +9,7 @@ require (
 	github.com/google/go-github/v50 v50.2.0
 	github.com/otiai10/copy v1.12.0
 	github.com/yuin/goldmark v1.4.13
+	go.abhg.dev/goldmark/toc v0.7.0
 	golang.org/x/net v0.9.0
 	golang.org/x/oauth2 v0.7.0
 )
