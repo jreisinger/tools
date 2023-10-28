@@ -10,6 +10,7 @@ import (
 
 	"github.com/jreisinger/tools/html"
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	ghtml "github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/toc"
 )
@@ -17,7 +18,10 @@ import (
 func toHTML(markdown []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	md := goldmark.New(
-		goldmark.WithExtensions(&toc.Extender{Compact: true}),
+		goldmark.WithExtensions(
+			&toc.Extender{Compact: true},
+			highlighting.Highlighting,
+		),
 		goldmark.WithRendererOptions(
 			// to show images inserted via GitHub web
 			ghtml.WithUnsafe(),
