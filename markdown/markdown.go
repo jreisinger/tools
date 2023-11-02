@@ -15,6 +15,7 @@ import (
 	"go.abhg.dev/goldmark/toc"
 )
 
+// toHTML converts markdown to HTML, adding ToC and syntax highlighting.
 func toHTML(markdown []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	md := goldmark.New(
@@ -53,7 +54,7 @@ func Is(file string) bool {
 	return filepath.Ext(file) == ".md"
 }
 
-func changeExt(path, ext string) string {
+func ChangeExt(path, ext string) string {
 	oldExt := filepath.Ext(path)
 	if oldExt != ".md" {
 		return path
@@ -62,35 +63,32 @@ func changeExt(path, ext string) string {
 	return bare + ext
 }
 
-// ToHTML converts markdown files to html files, changes their extension
-// from .md to .html and stores them in dir keeping the original directory
-// structure.
-func ToHTML(dir string, mdfiles []string) error {
-	for _, mdfile := range mdfiles {
-		m, err := os.ReadFile(mdfile)
-		if err != nil {
-			return fmt.Errorf("read markdown file: %v", err)
-		}
+// ToHTML converts mdfile to html file, changes the extension from .md to .html
+// and stores it in dir keeping the original directory path.
+func ToHTML(dir string, mdfile string) error {
+	m, err := os.ReadFile(mdfile)
+	if err != nil {
+		return fmt.Errorf("read markdown file: %v", err)
+	}
 
-		var h bytes.Buffer
-		h.Write([]byte(html.Head))
-		b, err := toHTML(m)
-		if err != nil {
-			return err
-		}
-		h.Write(b)
-		h.Write([]byte(html.Tail))
+	var h bytes.Buffer
+	h.Write([]byte(html.Head))
+	b, err := toHTML(m)
+	if err != nil {
+		return err
+	}
+	h.Write(b)
+	h.Write([]byte(html.Tail))
 
-		subdir := filepath.Dir(mdfile)
-		if err := os.MkdirAll(filepath.Join(dir, subdir), 0750); err != nil {
-			return err
-		}
+	subdir := filepath.Dir(mdfile)
+	if err := os.MkdirAll(filepath.Join(dir, subdir), 0750); err != nil {
+		return err
+	}
 
-		htmlfile := changeExt(mdfile, ".html")
-		if err := os.WriteFile(
-			filepath.Join(dir, htmlfile), h.Bytes(), 0640); err != nil {
-			return fmt.Errorf("write html file: %v", err)
-		}
+	htmlfile := ChangeExt(mdfile, ".html")
+	if err := os.WriteFile(
+		filepath.Join(dir, htmlfile), h.Bytes(), 0640); err != nil {
+		return fmt.Errorf("write html file: %v", err)
 	}
 	return nil
 }

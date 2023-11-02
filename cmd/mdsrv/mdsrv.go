@@ -25,7 +25,14 @@ var (
 )
 
 func main() {
+	log.SetFlags(0)
+	log.SetPrefix("mdsrv: ")
 	flag.Parse()
+
+	if len(flag.Args()) != 1 || !markdown.Is(flag.Args()[0]) {
+		log.Fatal("please supply .md file")
+	}
+	mdfile := flag.Args()[0]
 
 	tmpdir, err := tmpSubdir("/tmp")
 	if err != nil {
@@ -36,19 +43,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Continually be converting markdown files to html.
+	if err := copyStatic(tmpdir); err != nil {
+		log.Fatal(err)
+	}
+
+	// Continually be converting markdown file to html.
 	go func() {
 		for {
-			mdfiles, err := getMDfiles(flag.Args())
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			if err := copyStatic(tmpdir); err != nil {
-				log.Fatal(err)
-			}
-
-			if err := markdown.ToHTML(tmpdir, mdfiles); err != nil {
+			if err := markdown.ToHTML(tmpdir, mdfile); err != nil {
 				log.Fatal(err)
 			}
 			time.Sleep(time.Second)
@@ -56,7 +58,8 @@ func main() {
 	}()
 
 	addr := fmt.Sprintf("localhost:%d", *p)
-	log.Printf("serving files from %s at http://%s", tmpdir, addr)
+	htmlfile := markdown.ChangeExt(mdfile, ".html")
+	log.Printf("serving file from %s at http://%s/%s", tmpdir, addr, htmlfile)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
@@ -67,20 +70,6 @@ func copyStatic(tmpdir string) error {
 		return nil
 	}
 	return cp.Copy("static", filepath.Join(tmpdir, "static"))
-}
-
-// getMDfiles filters out markdown files from CLI arguments. If there are no CLI
-// arguments it searches current directory recursively.
-func getMDfiles(CLIargs []string) (mdfiles []string, err error) {
-	if len(CLIargs) > 0 {
-		for _, arg := range CLIargs {
-			if markdown.Is(arg) {
-				mdfiles = append(mdfiles, arg)
-			}
-		}
-		return
-	}
-	return markdown.Files(os.DirFS("."))
 }
 
 // tmpSubdir creates a temporary subdir in dir prefixed with mdsrv. It gets

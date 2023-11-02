@@ -13,7 +13,7 @@ func TestToHTML(t *testing.T) {
 		t.Fatalf("ToHTML failed: %v", err)
 	}
 	got := string(h)
-	want := "<h1>Title</h1>\n"
+	want := "<h1>Table of Contents</h1>\n<ul>\n<li>\nTitle</li>\n</ul>\n<h1>Title</h1>\n"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
@@ -52,7 +52,7 @@ func TestChangeExt(t *testing.T) {
 		{"dir/subdir/FILE.md", ".html", "dir/subdir/FILE.html"},
 	}
 	for _, test := range tests {
-		got := changeExt(test.path, test.ext)
+		got := ChangeExt(test.path, test.ext)
 		if got != test.want {
 			t.Errorf("got %q, want %q", got, test.want)
 		}
