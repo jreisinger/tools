@@ -23,10 +23,16 @@ var Tail = `
 // AddCSS adds style.css file to dir.
 func AddCSS(dir string) error {
 	css := `
-h2 { margin-bottom: 0px; }
-h3 { margin-bottom: 0px; }
-h4 { margin-bottom: 0px; }
-h5 { margin-bottom: 0px; }
+body {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+	line-height: 1.4;
+	font-size: small;
+}
+
+h1, h2, h3, h4, h5 { 
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
 
 img {
 	max-width: 100%;
