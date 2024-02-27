@@ -1,4 +1,4 @@
-module github.com/jreisinger/tools/bts
+module github.com/jreisinger/tools/btsaero
 
 go 1.22.0
 
