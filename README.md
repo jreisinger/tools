@@ -1,7 +1,10 @@
-Tools are small Go programs (packages) that I find useful or entertaining. To
-install and use a tool:
+Tools are small Go programs (packages) that I find useful or entertaining.
 
 ```
-$ go install ./<tool>/cmd/<tool>.go
+$ cd <tool>
+
+$ go run ./cmd/<tool>.go
+
+$ go install ./cmd/<tool>.go
 $ <tool>
 ```
