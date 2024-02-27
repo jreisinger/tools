@@ -1,0 +1,13 @@
+go 1.22.0
+
+use (
+	./bts
+	./decodeurl
+	./ghstats
+	./gorepojack
+	./mdsrv
+	./mtime
+	./repr
+	./tlsver
+	./workedon
+)

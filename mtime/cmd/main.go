@@ -1,4 +1,4 @@
-// Mtime recursively finds all files in a directory (defaults to .) and prints
+// Mtime recursively finds all files in a directory (. by default) and prints
 // them sorted by modification time.
 package main
 
