@@ -47,7 +47,7 @@ func main() {
 	log.SetPrefix(os.Args[0] + ": ")
 
 	flag.Usage = func() {
-		desc := "What you (or others) have worked on."
+		desc := "What git-tracked stuff have you (or others) worked on."
 		fmt.Fprintf(flag.CommandLine.Output(), "%s\n\n%s [flags] repo [repo ...]\n", desc, os.Args[0])
 		flag.PrintDefaults()
 		fmt.Fprintf(flag.CommandLine.Output(), "\nEXAMPLE\n  workedon ~/github.com/*/*\n")
