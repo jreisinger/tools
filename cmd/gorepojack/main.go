@@ -44,22 +44,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var dependencies []string
+	var modules []module
 	for _, mf := range modfiles {
 		deps, err := extractDeps(mf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		dependencies = append(dependencies, deps...)
-	}
-
-	var modules []module
-	for _, dep := range dependencies {
-		modules = append(modules, module{
-			path:    dep,
-			repoURL: inferRepoURL(dep),
-			userURL: inferUserURL(dep),
-		})
+		for _, dep := range deps {
+			modules = append(modules, module{
+				goModFilePath: mf,
+				path:          dep,
+				repoURL:       inferRepoURL(dep),
+				userURL:       inferUserURL(dep),
+			})
+		}
 	}
 
 	seen := make(map[string]bool)
@@ -82,9 +80,10 @@ func main() {
 }
 
 type module struct {
-	path    string // github.com/user/module/pkg
-	repoURL string // https://github.com/user/module
-	userURL string // https://github/com/user
+	goModFilePath string // /home/bill/github.com/ardanlabs/service/go.mod
+	path          string // github.com/user/module/pkg
+	repoURL       string // https://github.com/user/module
+	userURL       string // https://github/com/user
 }
 
 func extractDeps(gomod string) ([]string, error) {
@@ -133,10 +132,10 @@ func evalModRepo(mod module, verbose bool) {
 	switch repoResp.StatusCode {
 	case http.StatusOK:
 		if verbose {
-			fmt.Printf("%-5s %d for %s\n", "OK", repoResp.StatusCode, mod.repoURL)
+			fmt.Printf("%-5s %d for %s in %s\n", "OK", repoResp.StatusCode, mod.repoURL, mod.goModFilePath)
 		}
-	case http.StatusMovedPermanently:
-		fmt.Printf("%-5s %d for %s -> %s\n", "WARN", repoResp.StatusCode, mod.repoURL, repoResp.Header.Get("location"))
+	case http.StatusMovedPermanently, http.StatusFound:
+		fmt.Printf("%-5s %d for %s -> %s in %s\n", "WARN", repoResp.StatusCode, mod.repoURL, repoResp.Header.Get("location"), mod.goModFilePath)
 	case http.StatusNotFound:
 		userResp, err := getURL(mod.userURL)
 		if err != nil {
@@ -146,17 +145,17 @@ func evalModRepo(mod module, verbose bool) {
 		switch userResp.StatusCode {
 		case http.StatusOK:
 			if verbose {
-				fmt.Printf("%-5s %d for %s and %d for %s\n", "OK", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL)
+				fmt.Printf("%-5s %d for %s and %d for %s in %s\n", "OK", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL, mod.goModFilePath)
 			}
 		case http.StatusMovedPermanently, http.StatusFound:
-			fmt.Printf("%-5s %d for %s and %d for %s -> %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL, userResp.Header.Get("location"))
+			fmt.Printf("%-5s %d for %s and %d for %s -> %s in %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL, userResp.Header.Get("location"), mod.goModFilePath)
 		case http.StatusNotFound:
-			fmt.Printf("%-5s %d for %s and %d for %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL)
+			fmt.Printf("%-5s %d for %s and %d for %s in %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL, mod.goModFilePath)
 		default:
-			fmt.Printf("%-5s %d for %s and %d for %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL)
+			fmt.Printf("%-5s %d for %s and %d for %s in %s\n", "WARN", repoResp.StatusCode, mod.repoURL, userResp.StatusCode, mod.userURL, mod.goModFilePath)
 		}
 	default:
-		fmt.Printf("%-5s %d for %s\n", "WARN", repoResp.StatusCode, mod.repoURL)
+		fmt.Printf("%-5s %d for %s in %s\n", "WARN", repoResp.StatusCode, mod.repoURL, mod.goModFilePath)
 	}
 }
 
