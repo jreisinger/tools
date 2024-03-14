@@ -13,7 +13,7 @@ func TestToHTML(t *testing.T) {
 		t.Fatalf("ToHTML failed: %v", err)
 	}
 	got := string(h)
-	want := "<h1>Table of Contents</h1>\n<ul>\n<li>\nTitle</li>\n</ul>\n<h1>Title</h1>\n"
+	want := "<h1 id=\"table-of-contents\">Table of Contents</h1>\n<ul>\n<li>\nTitle</li>\n</ul>\n<h1>Title</h1>\n"
 	if got != want {
 		t.Errorf("got %q, want %q", got, want)
 	}
