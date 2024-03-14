@@ -1,10 +1,7 @@
-Tools are small Go programs (packages) that I find useful or entertaining.
+Tools module contains executable (main) Go packages (or commands) that I find useful or entertaining.
+
+To install one:
 
 ```
-$ cd <tool>
-
-$ go run ./cmd/<tool>.go
-
-$ go install ./cmd/<tool>.go
-$ <tool>
+go install github.com/jreisinger/tools/cmd/bts@latest
 ```
