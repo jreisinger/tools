@@ -34,8 +34,25 @@ type file struct {
 	authors []string
 }
 
+type authorFlags []string
+
+func (a *authorFlags) String() string {
+	return strings.Join(*a, " ")
+}
+
+func (a *authorFlags) Set(value string) error {
+	*a = append(*a, value)
+	return nil
+}
+
+func authorFlag(name string, value []string, usage string) *authorFlags {
+	f := authorFlags(value)
+	flag.Var(&f, name, usage)
+	return &f
+}
+
 var (
-	author = flag.String("author", "", "only changes by `this` author")
+	author = authorFlag("author", nil, "only changes made by `name` (can be used multiple times)")
 	days   = flag.Int("days", 7, "changes made in last `n` days")
 	files  = flag.Bool("files", false, "changes per file (default is per repo)")
 	ignore = flag.String("ignore", "", "ignore `filename` (e.g. LICENSE)")
@@ -47,12 +64,11 @@ func main() {
 	log.SetPrefix(os.Args[0] + ": ")
 
 	flag.Usage = func() {
-		desc := "What git-tracked stuff have you (or others) worked on."
+		desc := "What git-tracked stuff have you or others worked on."
 		fmt.Fprintf(flag.CommandLine.Output(), "%s\n\n%s [flags] repo [repo ...]\n", desc, os.Args[0])
 		flag.PrintDefaults()
-		fmt.Fprintf(flag.CommandLine.Output(), "\nEXAMPLE\n  workedon ~/github.com/*/*\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "\nEXAMPLE\n  workedon -author jane -author 'Joe Doe' ~/github.com/*/*\n")
 	}
-
 	flag.Parse()
 
 	if len(flag.Args()) == 0 {
@@ -94,7 +110,7 @@ func main() {
 			defer wg.Done()
 			for dir := range in {
 				since := time.Hour * 24 * time.Duration(*days)
-				files, err := parseRepoLogs(dir.repo, pull, author, &since)
+				files, err := parseRepoLogs(dir.repo, pull, *author, &since)
 				if err != nil {
 					switch err.(type) {
 					case *pullError:
@@ -182,7 +198,7 @@ func (e *pullError) Error() string {
 	return fmt.Sprint(e.Err)
 }
 
-func parseRepoLogs(repo *git.Repository, pull *bool, author *string, since *time.Duration) (files []file, err error) {
+func parseRepoLogs(repo *git.Repository, pull *bool, authors authorFlags, since *time.Duration) (files []file, err error) {
 	if *pull {
 		if err := pullRepo(repo); err != nil {
 			return nil, &pullError{Err: err}
@@ -199,8 +215,17 @@ func parseRepoLogs(repo *git.Repository, pull *bool, author *string, since *time
 	authorsPerFile := make(map[string][]string)
 	msgsPerFile := make(map[string][]string)
 	err = cIter.ForEach(func(commit *object.Commit) error {
-		if *author != "" && commit.Author.Name != *author {
-			return nil
+		if len(authors) > 0 {
+			var found bool
+			for _, a := range authors {
+				if commit.Author.Name == a {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil
+			}
 		}
 
 		stats, err := commit.Stats()
