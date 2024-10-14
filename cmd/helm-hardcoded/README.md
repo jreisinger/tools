@@ -1,0 +1,1 @@
+Helm-hardcoded finds lines of helm templates that contain a hardcoded string (as opposed to templated via `{{ ... }}`).
