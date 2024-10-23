@@ -20,10 +20,8 @@ func main() {
 	log.SetPrefix("mdsrv: ")
 
 	if len(os.Args[1:]) == 0 {
-		log.Fatal("please supply .md file")
+		log.Fatal("please supply *.md file(s)")
 	}
-
-	mdfile := os.Args[1]
 
 	tmpdir, err := os.MkdirTemp("", "mdsrv-*")
 	if err != nil {
@@ -34,19 +32,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Continually be converting markdown file to html.
-	go func() {
-		for {
-			if err := createHTML(tmpdir, mdfile); err != nil {
-				log.Fatal(err)
+	for _, mdfile := range os.Args[1:] {
+		// Continually be converting markdown file to html.
+		go func() {
+			for {
+				if err := createHTML(tmpdir, mdfile); err != nil {
+					log.Fatal(err)
+				}
+				time.Sleep(time.Second)
 			}
-			time.Sleep(time.Second)
-		}
-	}()
+		}()
+	}
 
 	// Start a web server serving content from tmpdir.
 	addr := fmt.Sprintf("localhost:%d", 8000)
-	log.Printf("serving files from %s at http://%s/%s", tmpdir, addr, strings.TrimSuffix(mdfile, ".md")+".html")
+	log.Printf("serving supplied *.md file(s) from %s at http://%s", tmpdir, addr)
 	handler := http.FileServer(http.Dir(tmpdir))
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
