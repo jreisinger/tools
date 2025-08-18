@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"time"
 
 	"github.com/yuin/goldmark"
+	highlighting "github.com/yuin/goldmark-highlighting/v2"
+	"github.com/yuin/goldmark/extension"
 	ghtml "github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/toc"
 )
@@ -19,7 +22,11 @@ func main() {
 	log.SetFlags(0)
 	log.SetPrefix("mdsrv: ")
 
-	if len(os.Args[1:]) == 0 {
+	highlight := flag.Bool("highlight", false, "enable syntax highlighting")
+	flag.Parse()
+
+	mdFiles := flag.Args()
+	if len(mdFiles) == 0 {
 		log.Fatal("please supply *.md file(s)")
 	}
 
@@ -32,16 +39,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, mdfile := range os.Args[1:] {
+	for _, mdfile := range mdFiles {
 		// Continually be converting markdown file to html.
-		go func() {
+		go func(mdfile string) {
 			for {
-				if err := createHTML(tmpdir, mdfile); err != nil {
+				if err := createHTML(tmpdir, mdfile, *highlight); err != nil {
 					log.Fatal(err)
 				}
 				time.Sleep(time.Second)
 			}
-		}()
+		}(mdfile)
 	}
 
 	// Start a web server serving content from tmpdir.
@@ -69,14 +76,16 @@ var htmlTail = `
 </html>
 `
 
-// toHTML converts markdown to HTML, adding ToC and syntax highlighting.
-func toHTML(markdown []byte) ([]byte, error) {
+// toHTML converts markdown to HTML, adding ToC and optional syntax highlighting.
+func toHTML(markdown []byte, highlight bool) ([]byte, error) {
 	var buf bytes.Buffer
+	var extensions []goldmark.Extender
+	extensions = append(extensions, &toc.Extender{Compact: true}, extension.Linkify)
+	if highlight {
+		extensions = append(extensions, highlighting.Highlighting)
+	}
 	md := goldmark.New(
-		goldmark.WithExtensions(
-			&toc.Extender{Compact: true},
-			// highlighting.Highlighting,
-		),
+		goldmark.WithExtensions(extensions...),
 		goldmark.WithRendererOptions(
 			// to show images inserted via GitHub web
 			ghtml.WithUnsafe(),
@@ -90,7 +99,7 @@ func toHTML(markdown []byte) ([]byte, error) {
 
 // createHTML converts contents of filename from markdown to html, replaces .md
 // suffix with .html and stores it in dir keeping the original directory path.
-func createHTML(dir string, filename string) error {
+func createHTML(dir string, filename string, highlight bool) error {
 	m, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("read markdown file: %v", err)
@@ -98,7 +107,7 @@ func createHTML(dir string, filename string) error {
 
 	var h bytes.Buffer
 	h.Write([]byte(htmlHead))
-	b, err := toHTML(m)
+	b, err := toHTML(m, highlight)
 	if err != nil {
 		return err
 	}
