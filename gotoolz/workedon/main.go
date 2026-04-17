@@ -107,12 +107,7 @@ func main() {
 				since := time.Hour * 24 * time.Duration(*days)
 				files, err := parseRepoLogs(dir.repo, *author, &since)
 				if err != nil {
-					switch err.(type) {
-					case *pullError:
-						log.Printf("pulling repo %s: %v", dir.path, err)
-					default:
-						log.Fatalf("parsing repo %s: %v", dir.path, err)
-					}
+					log.Fatalf("parsing repo %s: %v", dir.path, err)
 				}
 				for _, f := range files {
 					if *ignore != "" && filepath.Base(f.path) == *ignore {
@@ -184,14 +179,6 @@ type byDirChanges []directory
 func (x byDirChanges) Len() int           { return len(x) }
 func (x byDirChanges) Less(i, j int) bool { return x[i].changes < x[j].changes }
 func (x byDirChanges) Swap(i, j int)      { x[i], x[j] = x[j], x[i] }
-
-type pullError struct {
-	Err error
-}
-
-func (e *pullError) Error() string {
-	return fmt.Sprint(e.Err)
-}
 
 func parseRepoLogs(repo *git.Repository, authors authorFlags, since *time.Duration) (files []file, err error) {
 	t := time.Now().Add(-*since)
