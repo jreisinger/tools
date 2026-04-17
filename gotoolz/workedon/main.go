@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -15,7 +14,6 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 )
 
 type directory struct {
@@ -54,7 +52,6 @@ var (
 	days   = flag.Int("days", 7, "changes made in last `n` days")
 	files  = flag.Bool("files", false, "changes per file (default is per repo)")
 	ignore = flag.String("ignore", "", "ignore `filename` (e.g. LICENSE)")
-	pull   = flag.Bool("pull", false, "pull the repo before parsing its logs")
 )
 
 func main() {
@@ -108,7 +105,7 @@ func main() {
 			defer wg.Done()
 			for dir := range in {
 				since := time.Hour * 24 * time.Duration(*days)
-				files, err := parseRepoLogs(dir.repo, pull, *author, &since)
+				files, err := parseRepoLogs(dir.repo, *author, &since)
 				if err != nil {
 					switch err.(type) {
 					case *pullError:
@@ -196,13 +193,7 @@ func (e *pullError) Error() string {
 	return fmt.Sprint(e.Err)
 }
 
-func parseRepoLogs(repo *git.Repository, pull *bool, authors authorFlags, since *time.Duration) (files []file, err error) {
-	if *pull {
-		if err := pullRepo(repo); err != nil {
-			return nil, &pullError{Err: err}
-		}
-	}
-
+func parseRepoLogs(repo *git.Repository, authors authorFlags, since *time.Duration) (files []file, err error) {
 	t := time.Now().Add(-*since)
 	cIter, err := repo.Log(&git.LogOptions{Since: &t})
 	if err != nil {
@@ -258,32 +249,6 @@ func parseRepoLogs(repo *git.Repository, pull *bool, authors authorFlags, since 
 	}
 
 	return
-}
-
-func pullRepo(repo *git.Repository) error {
-	w, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return err
-	}
-	privateKeyFile := filepath.Join(home, ".ssh", "id_rsa")
-
-	publicKeys, err := ssh.NewPublicKeysFromFile("git", privateKeyFile, "")
-	if err != nil {
-		return err
-	}
-
-	err = w.Pull(&git.PullOptions{
-		Auth: publicKeys,
-	})
-	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
-		return err
-	}
-	return nil
 }
 
 func uniq(ss []string) []string {
